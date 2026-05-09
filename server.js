@@ -22,6 +22,9 @@ const settingsRoutes = require('./routes/settingsRoutes');
 
 const app = express();
 
+// Trust reverse proxy (Render, Vercel) so req.protocol returns https correctly
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
