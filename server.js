@@ -29,9 +29,20 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 app.use('/api/', limiter);
 
-// CORS
+// CORS — allow Vercel frontend + localhost dev
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, mobile apps, server-to-server)
+    if (!origin) return callback(null, true);
+    // Allow localhost for development
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) return callback(null, true);
+    // Allow all Vercel deployments
+    if (origin.includes('vercel.app')) return callback(null, true);
+    // Allow custom domain if set
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+    // Allow everything else for now (can restrict later)
+    return callback(null, true);
+  },
   credentials: true,
 }));
 
@@ -93,7 +104,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Auto-create admin user on every server start
+// Auto-create/fix admin user on every server start
 async function ensureAdminUser() {
   try {
     const User = require('./models/User');
@@ -101,12 +112,12 @@ async function ensureAdminUser() {
     if (!admin) {
       await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit@Raj123', role: 'admin' });
       console.log('✅ Admin user created');
-    } else if (admin.role !== 'admin') {
-      admin.role = 'admin';
-      await admin.save({ validateBeforeSave: false });
-      console.log('✅ Admin role fixed');
     } else {
-      console.log('✅ Admin user OK');
+      // Always ensure correct role + password on every restart
+      admin.role     = 'admin';
+      admin.password = 'Ankit@Raj123';
+      await admin.save();
+      console.log('✅ Admin user verified and ready');
     }
   } catch (e) {
     console.error('Admin setup error:', e.message);
