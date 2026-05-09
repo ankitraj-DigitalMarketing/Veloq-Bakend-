@@ -32,7 +32,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ['men', 'women', 'kids', 'sports', 'casual', 'formal'],
+      enum: ['men', 'women', 'kids', 'sports', 'casual', 'formal', 'sneakers', 'slippers', 'clogs', 'boots', 'loafers'],
     },
     subCategory: String,
     brand: { type: String, default: 'VELOQ' },
