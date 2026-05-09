@@ -4,7 +4,9 @@ const Settings = require('../models/Settings');
 router.get('/public', async (req, res) => {
   try {
     const settings = await Settings.findOne().select(
-      'storeName announcementText announcementEnabled socialLinks metaTitle metaDescription contactEmail contactPhone address aboutText'
+      'storeName announcementText announcementEnabled socialLinks metaTitle metaDescription ' +
+      'contactEmail contactPhone address aboutText freeShippingThreshold shippingCharge ' +
+      'facebookPixelId googleAdsId upiId upiName upiQrCode upiPaymentEnabled'
     );
     res.json({ success: true, settings: settings || {} });
   } catch (err) {

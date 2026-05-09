@@ -31,6 +31,14 @@ const settingsSchema = new mongoose.Schema(
     contactPhone: String,
     address: String,
     aboutText: String,
+    // Meta Ads
+    facebookPixelId: String,
+    googleAdsId: String,
+    // UPI / QR Code Payment
+    upiId:   String,
+    upiName: { type: String, default: 'VELOQ Payments' },
+    upiQrCode: String,
+    upiPaymentEnabled: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
