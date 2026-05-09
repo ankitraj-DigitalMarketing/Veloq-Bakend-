@@ -13,7 +13,7 @@ const fileFilter = (req, file, cb) => {
 // Use memory storage — uploadRoutes decides Cloudinary vs disk
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter,
 });
 
