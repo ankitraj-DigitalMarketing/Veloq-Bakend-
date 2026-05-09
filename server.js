@@ -62,6 +62,27 @@ app.use('/api/settings', settingsRoutes);
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 
+// ONE-TIME ADMIN SETUP — DELETE THIS ROUTE AFTER USE
+app.get('/api/setup-admin', async (req, res) => {
+  if (req.query.key !== 'VELOQ_ADMIN_SETUP_2024') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+  try {
+    const User = require('./models/User');
+    let user = await User.findOne({ email: 'jaipurankitraj@gmail.com' }).select('+password');
+    if (user) {
+      user.role     = 'admin';
+      user.password = 'Ankit@Raj123';
+      await user.save();
+      return res.json({ success: true, message: 'Admin user updated successfully!' });
+    }
+    await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit@Raj123', role: 'admin' });
+    res.json({ success: true, message: 'Admin user created successfully!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
