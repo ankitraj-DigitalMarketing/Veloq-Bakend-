@@ -4,6 +4,7 @@ const {
   getAllCustomers, toggleCustomerBlock,
   createCoupon, getCoupons, updateCoupon, deleteCoupon,
   getSettings, updateSettings,
+  getAllReviews, deleteReview, toggleVerifiedReview,
 } = require('../controllers/adminController');
 const { protect, admin } = require('../middleware/auth');
 
@@ -25,5 +26,9 @@ router.delete('/coupons/:id', deleteCoupon);
 
 router.get('/settings', getSettings);
 router.put('/settings', updateSettings);
+
+router.get('/reviews', getAllReviews);
+router.delete('/reviews/:productId/:reviewId', deleteReview);
+router.put('/reviews/:productId/:reviewId/verify', toggleVerifiedReview);
 
 module.exports = router;

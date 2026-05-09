@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Collection = require('../models/Collection');
 
 exports.getProducts = async (req, res) => {
   const {
@@ -65,21 +66,34 @@ exports.getProduct = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   const product = await Product.create(req.body);
+  if (req.body.collections?.length) {
+    await Collection.updateMany(
+      { _id: { $in: req.body.collections } },
+      { $addToSet: { products: product._id } }
+    );
+  }
   res.status(201).json({ success: true, product });
 };
 
 exports.updateProduct = async (req, res) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  const oldProduct = await Product.findById(req.params.id).select('collections');
+  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+
+  const oldCols = (oldProduct?.collections || []).map(id => id.toString());
+  const newCols = (req.body.collections || []).map(id => id.toString());
+  const added   = newCols.filter(id => !oldCols.includes(id));
+  const removed = oldCols.filter(id => !newCols.includes(id));
+  if (added.length)   await Collection.updateMany({ _id: { $in: added } },   { $addToSet: { products: product._id } });
+  if (removed.length) await Collection.updateMany({ _id: { $in: removed } }, { $pull:     { products: product._id } });
+
   res.json({ success: true, product });
 };
 
 exports.deleteProduct = async (req, res) => {
   const product = await Product.findByIdAndDelete(req.params.id);
   if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+  await Collection.updateMany({ products: product._id }, { $pull: { products: product._id } });
   res.json({ success: true, message: 'Product deleted' });
 };
 

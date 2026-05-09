@@ -6,7 +6,9 @@ router.get('/public', async (req, res) => {
     const settings = await Settings.findOne().select(
       'storeName announcementText announcementEnabled socialLinks metaTitle metaDescription ' +
       'contactEmail contactPhone address aboutText freeShippingThreshold shippingCharge ' +
-      'facebookPixelId googleAdsId upiId upiName upiQrCode upiPaymentEnabled'
+      'facebookPixelId googleAdsId upiId upiName upiQrCode upiPaymentEnabled ' +
+      'marqueeItems featureBar homepageShowNewArrivals homepageShowBestSellers ' +
+      'homepageShowCollections homepageShowTrending homepageShowWhyUs homepageShowReviews'
     );
     res.json({ success: true, settings: settings || {} });
   } catch (err) {

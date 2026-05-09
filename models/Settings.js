@@ -39,6 +39,19 @@ const settingsSchema = new mongoose.Schema(
     upiName: { type: String, default: 'VELOQ Payments' },
     upiQrCode: String,
     upiPaymentEnabled: { type: Boolean, default: false },
+    // Theme / Homepage Customization
+    marqueeItems: [{ type: String }],
+    featureBar: [{
+      icon:     { type: String },
+      title:    { type: String },
+      subtitle: { type: String },
+    }],
+    homepageShowNewArrivals:  { type: Boolean, default: true },
+    homepageShowBestSellers:  { type: Boolean, default: true },
+    homepageShowCollections:  { type: Boolean, default: true },
+    homepageShowTrending:     { type: Boolean, default: true },
+    homepageShowWhyUs:        { type: Boolean, default: true },
+    homepageShowReviews:      { type: Boolean, default: true },
   },
   { timestamps: true }
 );

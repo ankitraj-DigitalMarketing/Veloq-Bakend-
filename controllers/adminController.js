@@ -159,6 +159,52 @@ exports.deleteCoupon = async (req, res) => {
   res.json({ success: true, message: 'Coupon deleted' });
 };
 
+exports.getAllReviews = async (req, res) => {
+  const { page = 1, limit = 20, rating, verified } = req.query;
+  const match = {};
+  if (rating) match['reviews.rating'] = Number(rating);
+  if (verified === 'true') match['reviews.isVerifiedPurchase'] = true;
+
+  const skip = (page - 1) * limit;
+  const products = await Product.find({ 'reviews.0': { $exists: true } })
+    .select('name images reviews slug')
+    .lean();
+
+  const allReviews = [];
+  products.forEach(p => {
+    p.reviews.forEach(r => {
+      if (rating && r.rating !== Number(rating)) return;
+      if (verified === 'true' && !r.isVerifiedPurchase) return;
+      allReviews.push({ ...r, productId: p._id, productName: p.name, productSlug: p.slug, productImage: p.images?.[0]?.url });
+    });
+  });
+
+  allReviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const total = allReviews.length;
+  const paginated = allReviews.slice(skip, skip + Number(limit));
+  res.json({ success: true, reviews: paginated, total, pages: Math.ceil(total / limit) });
+};
+
+exports.deleteReview = async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const product = await Product.findById(productId);
+  if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+  product.reviews = product.reviews.filter(r => r._id.toString() !== reviewId);
+  await product.save();
+  res.json({ success: true, message: 'Review deleted' });
+};
+
+exports.toggleVerifiedReview = async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const product = await Product.findById(productId);
+  if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+  const review = product.reviews.id(reviewId);
+  if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
+  review.isVerifiedPurchase = !review.isVerifiedPurchase;
+  await product.save();
+  res.json({ success: true, isVerified: review.isVerifiedPurchase });
+};
+
 exports.getSettings = async (req, res) => {
   let settings = await Settings.findOne();
   if (!settings) settings = await Settings.create({});
