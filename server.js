@@ -93,12 +93,33 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Auto-create admin user on every server start
+async function ensureAdminUser() {
+  try {
+    const User = require('./models/User');
+    let admin = await User.findOne({ email: 'jaipurankitraj@gmail.com' }).select('+password');
+    if (!admin) {
+      await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit@Raj123', role: 'admin' });
+      console.log('✅ Admin user created');
+    } else if (admin.role !== 'admin') {
+      admin.role = 'admin';
+      await admin.save({ validateBeforeSave: false });
+      console.log('✅ Admin role fixed');
+    } else {
+      console.log('✅ Admin user OK');
+    }
+  } catch (e) {
+    console.error('Admin setup error:', e.message);
+  }
+}
+
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;
 mongoose
   .connect('mongodb+srv://jaipurankitraj_db_user:ZNDbWrc7YRdtFpBz@cluster0.jko9hzf.mongodb.net/veloqdb?retryWrites=true&w=majority&appName=Cluster0')
-  .then(() => {
+  .then(async () => {
     console.log('✅ MongoDB connected');
+    await ensureAdminUser();
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
