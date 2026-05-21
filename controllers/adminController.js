@@ -18,6 +18,7 @@ exports.getDashboard = async (req, res) => {
     totalCustomers,
     monthOrders,
     lastMonthRevenue,
+    pendingOrders,
     recentOrders,
     lowStockProducts,
     topProducts,
@@ -30,6 +31,7 @@ exports.getDashboard = async (req, res) => {
     Product.countDocuments({ status: 'active' }),
     User.countDocuments({ role: 'customer' }),
     Order.countDocuments({ createdAt: { $gte: startOfMonth }, orderStatus: { $ne: 'cancelled' } }),
+    Order.countDocuments({ orderStatus: 'pending' }),
     Order.aggregate([
       { $match: { paymentStatus: 'paid', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
       { $group: { _id: null, total: { $sum: '$total' } } },
@@ -67,6 +69,7 @@ exports.getDashboard = async (req, res) => {
       totalCustomers,
       monthOrders,
       lastMonthRevenue: lastMonthRevenue[0]?.total || 0,
+      pendingOrders,
     },
     recentOrders,
     lowStockProducts,
