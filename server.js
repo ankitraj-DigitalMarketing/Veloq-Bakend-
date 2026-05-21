@@ -86,11 +86,11 @@ app.get('/api/setup-admin', async (req, res) => {
     let user = await User.findOne({ email: 'jaipurankitraj@gmail.com' }).select('+password');
     if (user) {
       user.role     = 'admin';
-      user.password = 'Ankit@Raj123';
+      user.password = 'Ankit1234';
       await user.save();
       return res.json({ success: true, message: 'Admin user updated successfully!' });
     }
-    await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit@Raj123', role: 'admin' });
+    await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit1234', role: 'admin' });
     res.json({ success: true, message: 'Admin user created successfully!' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -113,12 +113,12 @@ async function ensureAdminUser() {
     const User = require('./models/User');
     let admin = await User.findOne({ email: 'jaipurankitraj@gmail.com' }).select('+password');
     if (!admin) {
-      await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit@Raj123', role: 'admin' });
+      await User.create({ name: 'Admin', email: 'jaipurankitraj@gmail.com', password: 'Ankit1234', role: 'admin' });
       console.log('✅ Admin user created');
     } else {
       // Always ensure correct role + password on every restart
       admin.role     = 'admin';
-      admin.password = 'Ankit@Raj123';
+      admin.password = 'Ankit1234';
       await admin.save();
       console.log('✅ Admin user verified and ready');
     }
@@ -129,8 +129,9 @@ async function ensureAdminUser() {
 
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb+srv://jaipurankitraj_db_user:ZNDbWrc7YRdtFpBz@cluster0.jko9hzf.mongodb.net/veloqdb?retryWrites=true&w=majority&appName=Cluster0';
 mongoose
-  .connect('mongodb+srv://jaipurankitraj_db_user:ZNDbWrc7YRdtFpBz@cluster0.jko9hzf.mongodb.net/veloqdb?retryWrites=true&w=majority&appName=Cluster0')
+  .connect(MONGO_URI)
   .then(async () => {
     console.log('✅ MongoDB connected');
     await ensureAdminUser();
